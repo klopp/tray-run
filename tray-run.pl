@@ -103,9 +103,11 @@ sub _start
         Carp::croak sprintf 'Fork error :: %s', $ERRNO;
     }
     elsif ( !$pid ) {
-        my ( $stdin, $stdout, $stderr );
+        #my ( $stdin, $stdout, $stderr );
+        #my ( $stdin, $stdout, $stderr );
         try {
-            run [ quotewords( '\s+', 1, $exec ) ], \$stdin, \$stdout, \$stderr;
+            #run [ quotewords( '\s+', 1, $exec ) ], my \$stdin, \$stdout, \$stderr;
+            run [ quotewords( '\s+', 1, $exec ) ], sub {}, sub {}, sub {};
         }
         catch {
             Carp::carp sprintf '[%s] :: %s', $exec, $_;
