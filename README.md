@@ -1,1 +1,0 @@
-Теперь живёт в [linux-stuff/tray-run](https://github.com/klopp/linux-stuff/tree/main/tray-run/)
