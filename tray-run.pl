@@ -43,6 +43,8 @@ if ( !$kill ) {
     $kill = $DEF_KILL;
     Carp::carp sprintf 'CONFIG :: no "Kill", set to "%s"', $DEF_KILL;
 }
+exists $SIG{$kill} or Carp::croak 'CONFIG :: invalid "Kill" value';
+
 my $trayicon = Gtk3::StatusIcon->new;
 _switch_state();
 $trayicon->set_tooltip_text("Left click: execute/stop\nRight click: stop and exit");
