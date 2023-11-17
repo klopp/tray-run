@@ -91,7 +91,6 @@ sub _icon
 sub _stop
 {
     $pid and killfam $kill, $pid;
-    undef $pid;
 }
 
 # ------------------------------------------------------------------------------
@@ -113,6 +112,7 @@ sub _start
     else {
         local $SIG{CHLD} = sub {
             1 while waitpid( $pid, WNOHANG ) > 0;
+            undef $pid;
         }
     }
 }
