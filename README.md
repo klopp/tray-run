@@ -1,1 +1,1 @@
-Теперь живёт в [linux-stuff/tray-run](/linux-stuff/tray-run/).
+Теперь живёт в [linux-stuff/tray-run](../linux-stuff/tray-run/).
