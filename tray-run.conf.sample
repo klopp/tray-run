@@ -1,5 +1,15 @@
+; что запускать:
 Exec    ~/bin/netcam-motion/netcam-motion.pl
+
+; иконка "программа запущена"
 On      i/6-on.png
+
+; иконка "программа не запущена"
 Off     i/6-off.png
+
+; запускать программу при старте или нет
+; FALSE => undef || /^0|off|no|false|none|never|jamais$/i
 Active  Off
+
+; каким сигналом убивать
 Kill    TERM

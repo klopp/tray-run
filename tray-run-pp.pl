@@ -6,9 +6,10 @@ use warnings;
 use utf8::all;
 use open qw/:std :utf8/;
 
+use Config::General qw/ParseConfig/;
 use Const::Fast;
 use English qw/-no_match_vars/;
-use File::Basename qw/dirname/;
+use File::Basename qw/dirname basename/;
 use Gtk3 qw/-init/;
 use IPC::Run qw/run/;
 use POSIX qw/:sys_wait_h/;
@@ -16,24 +17,29 @@ use Proc::Killfam;
 use Text::ParseWords qw/quotewords/;
 use Try::Catch;
 
-use Things::Bool;
-use Things::Config::Std;
-
 # ------------------------------------------------------------------------------
-const my $DEF_KILL => 'TERM';
+const my $DEF_KILL  => 'TERM';
+const my $SELF_PATH => dirname($PROGRAM_NAME);
 
 # ------------------------------------------------------------------------------
 our $VERSION = '1.0';
 
 # ------------------------------------------------------------------------------
 my $pid;
-my $cfg = Things::Config::Std->new( file => $ARGV[0] || q{*}, nocase => 1 );
-$cfg->error and Carp::croak sprintf 'FATAL :: %s', $cfg->error;
+my $cfg;
+my $self_name = basename($PROGRAM_NAME);
+$self_name =~ s/^(.+)[.][^.]+$/$1/gsm;
+my $cfile = $ARGV[0] || "$SELF_PATH/$self_name.conf" || "$SELF_PATH/$self_name.rc";
+%{$cfg} = ParseConfig(
+    -ConfigFile     => $cfile,
+    -LowerCaseNames => 1,
+    -UTF8           => 1,
+);
 my $exec  = _parse_path( _cget('Exec') );
-my $kill  = $cfg->get('kill');
+my $kill  = $cfg->{kill};
 my $on    = _icon('On');
 my $off   = _icon('Off');
-my $state = parse_bool( $cfg->get('Active') ) ? 0 : 1;
+my $state = $cfg->{active} ? 0 : 1;
 
 -x $exec or Carp::croak sprintf '"%s" is not executable file', $exec;
 if ( !$kill ) {
@@ -79,7 +85,7 @@ sub _parse_path
 sub _cget
 {
     my ($name) = @_;
-    my $val = $cfg->get( lc $name );
+    my $val = $cfg->{ lc $name };
     $val or Carp::croak sprintf 'CONFIG :: no "%s" value', $name;
     return $val;
 }
