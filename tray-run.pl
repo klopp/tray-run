@@ -21,7 +21,6 @@ use Things::Config::Std;
 
 # ------------------------------------------------------------------------------
 const my $DEF_KILL => 'TERM';
-const my $ICO_PATH => dirname($PROGRAM_NAME) . q{/};
 
 # ------------------------------------------------------------------------------
 our $VERSION = '1.0';
@@ -30,13 +29,12 @@ our $VERSION = '1.0';
 my $pid;
 my $cfg = Things::Config::Std->new( file => $ARGV[0] || q{*}, nocase => 1 );
 $cfg->error and Carp::croak sprintf 'FATAL :: %s', $cfg->error;
-my $exec  = _cget('Exec');
+my $exec  = _parse_path( _cget('Exec') );
 my $kill  = $cfg->get('kill');
 my $on    = _icon('On');
 my $off   = _icon('Off');
 my $state = parse_bool( $cfg->get('Active') ) ? 0 : 1;
 
-$exec =~ s/^~/$ENV{HOME}/sm;
 -x $exec or Carp::croak sprintf '"%s" is not executable file', $exec;
 if ( !$kill ) {
     $kill = $DEF_KILL;
@@ -65,6 +63,19 @@ $trayicon->signal_connect(
 Gtk3->main;
 
 # ------------------------------------------------------------------------------
+sub _parse_path
+{
+    my ($path) = @_;
+    if ( $path =~ /^~(.*)/ ) {
+        $path = $ENV{HOME} . $1;
+    }
+    elsif ( $path !~ /^\// ) {
+        $path = sprintf '%s/%s', dirname($PROGRAM_NAME), $path;
+    }
+    return $path;
+}
+
+# ------------------------------------------------------------------------------
 sub _cget
 {
     my ($name) = @_;
@@ -80,7 +91,7 @@ sub _icon
     my ( $file, $ico ) = ( _cget($name) );
 
     try {
-        $file = $ICO_PATH . $file;
+        $file = _parse_path($file);
         $ico  = Gtk3::Gdk::Pixbuf->new_from_file($file);
     }
     catch {
