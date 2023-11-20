@@ -29,13 +29,14 @@ our $VERSION = '1.0';
 my $pid;
 my $cfg = Things::Config::Std->new( file => $ARGV[0] || q{*}, nocase => 1 );
 $cfg->error and Carp::croak sprintf 'FATAL :: %s', $cfg->error;
-my $exec  = _parse_path( _cget('Exec') );
-my $kill  = $cfg->get('kill');
-my $on    = _icon('On');
-my $off   = _icon('Off');
-my $state = parse_bool( $cfg->get('Active') ) ? 0 : 1;
+my $exec      = _cget('Exec');
+my $real_exec = _parse_path($exec);
+my $kill      = $cfg->get('kill');
+my $on        = _icon('On');
+my $off       = _icon('Off');
+my $state     = parse_bool( $cfg->get('Active') ) ? 0 : 1;
 
--x $exec or Carp::croak sprintf '"%s" is not executable file', $exec;
+-x $real_exec or Carp::croak sprintf '"%s" is not executable file', $exec;
 if ( !$kill ) {
     $kill = $DEF_KILL;
     Carp::carp sprintf 'CONFIG :: no "Kill", set to "%s"', $DEF_KILL;
@@ -44,7 +45,7 @@ exists $SIG{$kill} or Carp::croak 'CONFIG :: invalid "Kill" value';
 
 my $trayicon = Gtk3::StatusIcon->new;
 _switch_state();
-$trayicon->set_tooltip_text("Left click: execute/stop\nRight click: stop and exit");
+$trayicon->set_tooltip_text( sprintf "Left click: execute/stop\n[%s]\nRight click: stop and exit", $exec );
 $trayicon->signal_connect(
     'button_press_event' => sub {
         my ( undef, $event ) = @_;
@@ -115,7 +116,7 @@ sub _start
     }
     elsif ( !$pid ) {
         try {
-            run [ quotewords( '\s+', 1, $exec ) ], sub { }, sub { }, sub { };
+            run [ quotewords( '\s+', 1, $real_exec ) ], sub { }, sub { }, sub { };
         }
         catch {
             Carp::carp sprintf '[%s] :: %s', $exec, $_;
