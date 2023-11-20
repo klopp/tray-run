@@ -8,8 +8,7 @@ On      i/6-on.png
 Off     i/6-off.png
 
 ; запускать программу при старте или нет
-; FALSE => undef || /^0|off|no|false|none|never|jamais$/i
-Active  Off
+Active  0
 
 ; каким сигналом убивать
 Kill    TERM
